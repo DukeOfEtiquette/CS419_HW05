@@ -1,6 +1,12 @@
 #include <SFE_MMA8452Q.h>
 #include <MsTimer2.h>
 
+#define FLEX_PIN A0
+#define VCC 4.98
+#define R_DIV 10000.0
+#define STRAIGHT_RES 30500.0
+#define BEND_RES 75000.0
+
 bool sensor = true; //ACC == true, FLX == false
 bool sample = true; //50hz == true, 5hz == false
 
