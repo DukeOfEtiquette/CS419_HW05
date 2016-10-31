@@ -30,7 +30,9 @@ double getSamplingTime()
 void sampleAcc()
 {
   accel.read();
-  
+  xAcceleration = accel.x; // Read in raw x-axis acceleration data
+  Serial.print("Acceleration on the x-axis is ");
+  Serial.println(xAcceleration);
   
 }
 
