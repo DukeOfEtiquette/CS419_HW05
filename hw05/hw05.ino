@@ -31,6 +31,15 @@ void sampleAcc()
 
 void sampleFlex()
 {
+  int flexADC = analogRead(FLEX_PIN);
+  float flexV = flexADC * VCC / 1023.0
+  float flexR = R_DIV * (VCC / flexV - 1.0);
+  Serial.println("Resistance: " + String(FlexR) + " ohms");
+
+  float angle = map(flexR, STRAIGHT_RES,  BEND_RES, 0, 90.0);
+  Serial.println("Bend: " + String(angle) + " degrees");
+  Serial.println();
+  
 }
 
 void startSampling()
@@ -78,7 +87,8 @@ void getSamplingInfo()
 
 void setup() {
   // put your setup code here, to run once
-
+  Serial.begin(9600);
+  pinMode(FLEX_PIN, INPUT);
   
 
 }
