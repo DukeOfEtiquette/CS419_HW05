@@ -4,8 +4,7 @@ import serial
 import time
 import sys
 
-arduino = serial.Serial('/dev/ttyACM0', 9600, timeout=5)
-time.sleep(2)
+arduino = serial.Serial('/dev/cu.usbmodem1411', 57600)
 
 arduino.flush()
 arduino.write('N')

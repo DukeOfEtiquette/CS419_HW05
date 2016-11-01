@@ -11,18 +11,15 @@
 
 bool sensor = true; //ACC == true, FLX == false
 bool sample = true; //50hz == true, 5hz == false
-String arg;
 
 MMA8452Q accel;
 
-
-String readString;
-
-
-//TODO(adam): Update to not be based off the rheostat
 double getSamplingTime()
 {
   double hz;
+
+  //If true then sample at 50hz
+  //Else sample at 5hz
   if(sample)
     hz = 50;
   else
@@ -34,121 +31,118 @@ double getSamplingTime()
 
 void sampleAcc()
 {
-  accel.read();
-  int xAcceleration = accel.x; // Read in raw x-axis
-  int yAcceleration = accel.y; // Read in raw y-axis
-  int zAcceleration = accel.z; // Read in raw z-axis
+  //delay(1000);
+  Serial.println("Let's sample");
+  //delay(1);
+  String res = "";
 
-  // print the values
-  Serial.print(xAcceleration + " ");
-  Serial.print(yAcceleration + " ");
-  Serial.print(zAcceleration + " ");  
+  byte foo = accel.available();
 
-  byte pl = accel.readPL();
-  switch (pl)
+  //Serial.println(foo);
+
+  /*if(accel.available())
   {
-  case PORTRAIT_U:
-      Serial.print("Portrait Up");
-      break;
-  case PORTRAIT_D:
-      Serial.print("Portrait Down");
-      break;
-  case LANDSCAPE_R:
-      Serial.print("Landscape Right");
-      break;
-  case LANDSCAPE_L:
-      Serial.print("Landscape Left");
-      break;
-  case LOCKOUT:
-      Serial.print("Flat");
-      break;
-  }
-  Serial.print("\n");
+    //Read data from accel
+    accel.read();
+
+    //Build up data so it is formatted "x,y,z"
+    res += accel.cx;
+    res += ",";
+    res += accel.cy;
+    res += ",";
+    res += accel.cz;
+
+    //Send the info to the base station
+    Serial.println(res);
+  }*/
+
 }
 
 void sampleFlex()
 {
+  //Serial.println("Why?");
+  //Gather the angle of the flex sensor
   int flexADC = analogRead(FLEX_PIN);
-  float flexV = flexADC * VCC / 1023.0;
-  float flexR = R_DIV * (VCC / flexV - 1.0);
-  Serial.println("Resistance: " + String(flexR) + " ohms");
+  float flexV = flexADC * VCC / 1023.0; // 
+  float flexR = R_DIV * (VCC / flexV - 1.0); 
+  float angle = map(flexR, STRAIGHT_RES, BEND_RES, 0, 90.0);
 
-  float angle = map(flexR, STRAIGHT_RES,  BEND_RES, 0, 90.0);
-  Serial.println("Bend: " + String(angle) + " degrees");
-  Serial.println();
+  //Send the info to the base station
+  Serial.println(String(angle)); // degree of bend
 }
 
 void startSampling()
 {
+  Serial.println("Hello");
+
+  //If sensor is true then sample the accel
+  //Else sample the flex
   if(sensor)
+  {
+    Serial.println("howdy");
+    accel.init();
+    Serial.println("hey");
     MsTimer2::set(getSamplingTime(), sampleAcc);
+  }
   else if(!sensor)
     MsTimer2::set(getSamplingTime(), sampleFlex);
 
+  Serial.println("Bye");
+  //Start the timer
   MsTimer2::start();
-}
-
-void stopSampling()
-{
-  MsTimer2::stop();
-}
-
-void getSamplingInfo()
-{
-  char arg;
-
-  arg = Serial.read();
-  delay(100);
-
-  //F is for FLEX
-  if(arg == 'F')
-    sensor = false;
-
-  arg = Serial.read();
-  delay(100); //Give the serial port some time to catch up
-
-  //S is for slow (5hz)
-  if(arg == 'S')
-    sample = false;
-
-  startSampling();
+  Serial.println("yo");
 }
 
 void setup() {
 
   Serial.begin(9600);
 
+  //Set flex sensor pin to input and init the accel sensor
   pinMode(FLEX_PIN, INPUT);
-  //Serial.println("test");
-  //accel.init();
 
+  delay(1000);
 }
 
 void loop() {
-  delay(100);
-  //Serial.print("T");
-  //While serial port has nothing in buffer, busy wait
-  arg = "";
-  //while(!Serial.available()){}
 
-  //Serial.println("HELLO");
-  
-  //Wait until something comes over the serial port
-  //while(Serial.available() < 1){}
+  //Serial.println(Serial.available());
 
+  //If something is available to read, then read it ya dingus
   if(Serial.available())
   {
-    Serial.println("test");
-    arg += Serial.read();
-    //delay(1000);
+    //Serial.println("ls");
+    //startSampling();
+    char arg = "";
+
+    //While there is something in the serial buffer
+    //pull it out one byte at a time
+    while(Serial.available())
+    {
+      //Make sure serial has enough time to catch up
+      delay(100);
+
+      //Read the byte
+      arg = Serial.read();
+      //Serial.println(arg);
+    
+      //F is for FLEX
+      if(arg == 'f')
+      {
+        sensor = false;
+        Serial.println("Sensor false");
+      }
+      
+      //S is for slow (5hz)
+      if(arg == 's')
+      {
+        sample = false;
+        Serial.println("Sample false");
+      }
+    }
+
+    //While statement is false which means we read everything
+    //that was passed through the serial port so start sampling
+    startSampling();
   }
-
-
-  //N == new sampling request
-  //T == stop current sampling
-  //if(arg == 'N')
-     //getSamplingInfo();
-  //else if(arg == 'T')
-     //stopSampling();
 
 }
