@@ -1,14 +1,10 @@
 #include <SFE_MMA8452Q.h>
 #include <MsTimer2.h>
-
-#define FLEX_PIN A0
-#define VCC 4.98
-#define R_DIV 10000.0
-#define STRAIGHT_RES 30500.0
-#define BEND_RES 75000.0
+#include <Arduino.h>
 
 bool sensor = true; //ACC == true, FLX == false
 bool sample = true; //50hz == true, 5hz == false
+String arg;
 
 //TODO(adam): Update to not be based off the rheostat
 double getSamplingTime()
@@ -18,8 +14,6 @@ double getSamplingTime()
     hz = 50;
   else
     hz = 5;
-  //Interpolate rheostate value to desired Hz value
-  double hz = ( ( (MAX_HZ - MIN_HZ) /1023) * hz ) + MIN_HZ;
 
   //Convert frequency to milliseconds and return value
   return 1000 / hz;
@@ -27,34 +21,19 @@ double getSamplingTime()
 
 void sampleAcc()
 {
+  int x = 42;
 }
 
 void sampleFlex()
 {
-  int flexADC = analogRead(FLEX_PIN);
-  float flexV = flexADC * VCC / 1023.0
-  float flexR = R_DIV * (VCC / flexV - 1.0);
-  Serial.println("Resistance: " + String(FlexR) + " ohms");
-
-  float angle = map(flexR, STRAIGHT_RES,  BEND_RES, 0, 90.0);
-  Serial.println("Bend: " + String(angle) + " degrees");
-  Serial.println();
-  
 }
 
 void startSampling()
 {
   if(sensor)
-     if(sample)
-        MsTimer2::set(getSamplingTime(), sampleACC);
-     else
-        MsTimer2::set(getSamplingTime(), sampleACC);
+    MsTimer2::set(getSamplingTime(), sampleAcc);
   else if(!sensor)
-     if(sample)
-        MsTimer2::set(getSamplingTime(), sampleFlex);
-     else
-        MsTimer2::set(getSamplingTime(), sampleFlex);
-
+    MsTimer2::set(getSamplingTime(), sampleFlex);
 
   MsTimer2::start();
 }
@@ -72,41 +51,44 @@ void getSamplingInfo()
   delay(100);
 
   //F is for FLEX
-  if(arg == F)
+  if(arg == 'F')
     sensor = false;
 
   arg = Serial.read();
   delay(100); //Give the serial port some time to catch up
 
   //S is for slow (5hz)
-  if(arg == S)
+  if(arg == 'S')
     sample = false;
 
   startSampling();
 }
 
 void setup() {
-  // put your setup code here, to run once
+
   Serial.begin(9600);
-  pinMode(FLEX_PIN, INPUT);
-  
 
 }
 
 void loop() {
   //While serial port has nothing in buffer, busy wait
-
+  arg = "";
   //Wait until something comes over the serial port
-  while(Serial.available() < 1){}
+  //while(Serial.available() < 1){}
 
-  char arg = Serial.read();
-  delay(100);
+  if(Serial.available() > 0)
+  {
+    arg += Serial.read();
+    delay(1000);
+    Serial.println("test");
+  }
+
 
   //N == new sampling request
   //T == stop current sampling
-  if(arg == N)
-     getSamplingInfo();
-  else if(arg == T)
-     stopSampling();
+  //if(arg == 'N')
+     //getSamplingInfo();
+  //else if(arg == 'T')
+     //stopSampling();
 
 }
