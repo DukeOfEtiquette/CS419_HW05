@@ -1,8 +1,13 @@
 #include <SFE_MMA8452Q.h>
 #include <Wire.h>
-#include <SFE_MMA8452Q.h>
 #include <MsTimer2.h>
 #include <Arduino.h>
+
+#define FLEX_PIN A0
+#define VCC 4.98
+#define R_DIV 10000.0
+#define STRAIGHT_RES 30500.0
+#define BEND_RES 75000.0
 
 bool sensor = true; //ACC == true, FLX == false
 bool sample = true; //50hz == true, 5hz == false
@@ -114,22 +119,28 @@ void setup() {
   Serial.begin(9600);
 
   pinMode(FLEX_PIN, INPUT);
-  accel.init();
+  //Serial.println("test");
+  //accel.init();
+
 }
 
 void loop() {
+  delay(100);
+  //Serial.print("T");
   //While serial port has nothing in buffer, busy wait
   arg = "";
   //while(!Serial.available()){}
+
+  //Serial.println("HELLO");
   
   //Wait until something comes over the serial port
   //while(Serial.available() < 1){}
 
-  if(Serial.available() > 0)
+  if(Serial.available())
   {
-    arg += Serial.read();
-    delay(1000);
     Serial.println("test");
+    arg += Serial.read();
+    //delay(1000);
   }
 
 

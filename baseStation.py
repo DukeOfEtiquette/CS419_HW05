@@ -1,7 +1,6 @@
 # !/usr/bin/python
 import sys
 import serial
-import socket
 import signal
 import time
 
@@ -45,8 +44,8 @@ time.sleep(1)
 #print("waiting...")
 while True:
     print("hi")
-    out += ser.readline()
-    print(">> ", out)
+    out += str(ser.read().decode())
+    print(out)
 
 #if out != '':
 
