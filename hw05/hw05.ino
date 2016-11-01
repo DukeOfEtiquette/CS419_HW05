@@ -14,6 +14,10 @@ bool sample = true; //50hz == true, 5hz == false
 
 MMA8452Q accel;
 
+
+String readString;
+
+
 //TODO(adam): Update to not be based off the rheostat
 double getSamplingTime()
 {
@@ -29,11 +33,37 @@ double getSamplingTime()
 
 void sampleAcc()
 {
-  accel.read();
-  xAcceleration = accel.x; // Read in raw x-axis acceleration data
-  Serial.print("Acceleration on the x-axis is ");
-  Serial.println(xAcceleration);
   
+  accel.read();
+  int xAcceleration = accel.x; // Read in raw x-axis
+  int yAcceleration = accel.y; // Read in raw y-axis
+  int zAcceleration = accel.z; // Read in raw z-axis
+
+  // print the values
+  Serial.print(xAcceleration + " ");
+  Serial.print(yAcceleration + " ");
+  Serial.print(zAcceleration + " ");  
+
+  byte pl = accel.readPL();
+  switch (pl)
+  {
+  case PORTRAIT_U:
+      Serial.print("Portrait Up");
+      break;
+  case PORTRAIT_D:
+      Serial.print("Portrait Down");
+      break;
+  case LANDSCAPE_R:
+      Serial.print("Landscape Right");
+      break;
+  case LANDSCAPE_L:
+      Serial.print("Landscape Left");
+      break;
+  case LOCKOUT:
+      Serial.print("Flat");
+      break;
+  }
+  Serial.print("\n");
 }
 
 void sampleFlex()
@@ -93,7 +123,8 @@ void setup() {
 
 void loop() {
   //While serial port has nothing in buffer, busy wait
-
+  //while(!Serial.available()){}
+  
   //Wait until something comes over the serial port
   while(Serial.available() < 1){}
 
