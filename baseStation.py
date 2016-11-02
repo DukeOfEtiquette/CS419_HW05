@@ -116,7 +116,7 @@ while True:
     print("Received:", results)
 
     # Write the result to the file
-    file.write('{0},{1}\n'.format(results, time.strftime('%H:%M:%S')))
+    file.write('{0},{1}\n'.format(time.strftime('%H:%M:%S'), results))
 
 # Close it up
 file.close()
