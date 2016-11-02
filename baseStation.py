@@ -112,9 +112,6 @@ while True:
         ser.close()
         sys.exit(1)
 
-    # Sanity
-    print("Received:", results)
-
     # Write the result to the file
     file.write('{0},{1}\n'.format(time.strftime('%H:%M:%S'), results))
 
