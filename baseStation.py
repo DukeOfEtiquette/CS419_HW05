@@ -17,6 +17,7 @@ if len(sys.argv) != 4:
 def signal_handler(signal, frame):
     print('\nExiting with the highest amount of grace')
     ser.close()
+    file.close()
     sys.exit(0)
 
 
@@ -83,9 +84,11 @@ while True:
     else:
         print("Invalid option.")
 
+# Build file name based on date, time, sensor, and rate
 fileName = datetime.datetime.now().strftime('%m_%d_%Y_%H_%M_%S_')
 fileName += '{0}_{1}.csv'.format(sensor, rate)
 
+# Try to open the file
 try:
     file = open(fileName, 'w')
     print("Results will be saved in {0}.".format(fileName))
@@ -94,17 +97,27 @@ except IOError:
 
 results = ''
 
+# Read from the arduino
 while True:
+    # Get an entire line
     results = ser.readline().strip()
+    # Decode it (python3 thing)
     results = results.decode()
+    # Idk...maybe this helps?
     sys.stdout.flush()
 
+    # If it's blank then something must have disconnected
     if res == '':
         print("Nothing received from arduino, exiting.")
         ser.close()
         sys.exit(1)
 
+    # Sanity
     print("Received:", results)
 
+    # Write the result to the file
     file.write('{0},{1}\n'.format(results, time.strftime('%H:%M:%S')))
+
+# Close it up
+file.close()
 
